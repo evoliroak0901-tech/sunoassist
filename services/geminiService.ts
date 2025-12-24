@@ -231,10 +231,18 @@ export const generateVideoPromptForSection = async (apiKey: string, lyricsPart: 
 
 export const generateImage = async (apiKey: string, prompt: string): Promise<string | null> => {
     try {
-        // Direct image generation is not available via text-only generateContent in this SDK version
-        // This is a placeholder or you might use a different service. 
-        // For now, let's keep it as null or log that Gemini 1.5 doesn't do native Image bytes via this call directly.
-        console.warn("Direct image bytes generation is not supported via Gemini 1.5 generateContent in this SDK version.");
+        // According to user context, gemini-2.5-flash-image was the model used before.
+        const model = getModel(apiKey, 'gemini-2.5-flash-image');
+        const result = await model.generateContent(prompt);
+
+        const response = result.response;
+        if (response.candidates && response.candidates[0].content && response.candidates[0].content.parts) {
+            for (const part of response.candidates[0].content.parts) {
+                if (part.inlineData && part.inlineData.mimeType.startsWith('image/')) {
+                    return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                }
+            }
+        }
         return null;
     } catch (error) {
         console.error("Error generating image:", error);

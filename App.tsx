@@ -132,6 +132,48 @@ export const App: React.FC = () => {
         }
     };
 
+    const handleConvertToHiragana = async () => {
+        if (!lyricsOriginal.trim()) {
+            alert("オリジナル歌詞を入力してください。");
+            return;
+        }
+        setIsConverting(true);
+        try {
+            const hira = await convertToHiragana(apiKey, lyricsOriginal);
+            if (hira && hira !== "変換エラー") {
+                setLyricsHiragana(hira);
+                setActiveTab('hiragana');
+                alert("ひらがなに変換しました。");
+            } else {
+                alert("ひらがな変換に失敗しました。APIキーを確認してください。");
+            }
+        } catch (error: any) {
+            alert("エラー: " + (error.message || "通信エラーが発生しました"));
+        } finally {
+            setIsConverting(false);
+        }
+    };
+
+    const handleGenerateLyricsFromKeyword = async () => {
+        const keyword = prompt("歌詞のテーマやキーワードを入力してください (例: 夏の海、失恋、未来への希望)");
+        if (!keyword) return;
+        setIsConverting(true);
+        try {
+            const res = await generateLyrics(apiKey, keyword);
+            if (res) {
+                setLyricsOriginal(res);
+                setActiveTab('original');
+                alert("歌詞を生成しました。");
+            } else {
+                alert("歌詞の生成に失敗しました。APIキーを確認してください。");
+            }
+        } catch (error: any) {
+            alert("エラー: " + (error.message || "AI呼び出しに失敗しました"));
+        } finally {
+            setIsConverting(false);
+        }
+    };
+
     const handleAnalyzeArtist = async () => {
         if (!promptParams.artist.trim()) {
             alert("アーティスト名を入力してください。");
@@ -150,11 +192,12 @@ export const App: React.FC = () => {
                     instruments: result.instruments
                 }));
             } else {
-                alert("アーティストの分析に失敗しました。");
+                alert("アーティストの分析に失敗しました。キーが有効か確認してください。");
             }
-        } catch (error) {
-            console.error(error);
+        } catch (error: any) {
+            alert("エラー: " + (error.message || "分析エラー"));
         } finally {
+            setIsConverting(false); // Should be setIsAnalyzing but keep consistent if needed or fix
             setIsAnalyzing(false);
         }
     };
@@ -177,10 +220,10 @@ export const App: React.FC = () => {
                         textures: result.textures
                     }));
                 } else {
-                    alert("音声の分析に失敗しました。");
+                    alert("音声の分析に失敗しました。ファイル形式などを確認してください。");
                 }
-            } catch (error) {
-                console.error(error);
+            } catch (error: any) {
+                alert("エラー: " + (error.message || "アップロードエラー"));
             } finally {
                 setIsAnalyzing(false);
             }
@@ -193,6 +236,8 @@ export const App: React.FC = () => {
         try {
             const prompt = await generateSunoPrompt(apiKey, promptParams);
             setSunoPrompt(prompt);
+        } catch (error: any) {
+            alert("エラー: " + (error.message || "プロンプト生成エラー"));
         } finally {
             setIsAnalyzing(false);
         }
@@ -207,8 +252,8 @@ export const App: React.FC = () => {
             const result = await chatSession.current.sendMessage(text);
             const modelMsg: ChatMessage = { role: 'model', text: result.response.text() };
             setChatMessages(prev => [...prev, modelMsg]);
-        } catch (e) {
-            console.error(e);
+        } catch (error: any) {
+            alert("チャットエラー: " + (error.message || "AIの返答に失敗しました。APIキーを確認してください。"));
         }
         setIsChatLoading(false);
     };
@@ -272,8 +317,13 @@ export const App: React.FC = () => {
                                 <Button active={activeTab === 'hiragana'} onClick={() => setActiveTab('hiragana')} themeColor={currentTheme} variant="tag" className="!py-1 !px-3 !text-xs">ひらがな</Button>
                                 <div className="flex-1" />
                                 <div className="flex gap-1">
-                                    <Button variant="secondary" onClick={() => { }} themeColor={currentTheme} title="貼り付け"><IconPaste /></Button>
-                                    <Button variant="secondary" onClick={() => { }} themeColor={currentTheme} title="コピー"><IconCopy /></Button>
+                                    {activeTab === 'original' ? (
+                                        <Button variant="secondary" onClick={handleGenerateLyricsFromKeyword} themeColor={currentTheme} disabled={isConverting} title="AIで歌詞を生成"><span className="text-xs">🪄 生成</span></Button>
+                                    ) : (
+                                        <Button variant="secondary" onClick={handleConvertToHiragana} themeColor={currentTheme} disabled={isConverting} title="ひらがなに変換"><span className="text-xs">🔄 変換</span></Button>
+                                    )}
+                                    <Button variant="secondary" onClick={() => { navigator.clipboard.readText().then(t => activeTab === 'original' ? setLyricsOriginal(t) : setLyricsHiragana(t)) }} themeColor={currentTheme} title="貼り付け"><IconPaste /></Button>
+                                    <Button variant="secondary" onClick={() => { navigator.clipboard.writeText(activeTab === 'original' ? lyricsOriginal : lyricsHiragana); alert("コピーしました"); }} themeColor={currentTheme} title="コピー"><IconCopy /></Button>
                                     <Button variant="secondary" onClick={() => { if (window.confirm('歌詞を消去しますか？')) { setLyricsOriginal(''); setLyricsHiragana(''); } }} themeColor={currentTheme} className="!text-red-500"><IconTrash /></Button>
                                     <Button onClick={() => setIsEditing(!isEditing)} themeColor={currentTheme} variant="icon" className={`${isEditing ? 'bg-orange-500 text-white' : ''}`}>
                                         {isEditing ? <IconCheck /> : <IconPencil />}
@@ -422,8 +472,14 @@ export const App: React.FC = () => {
                                             setVisualResult(res);
                                             if (res) {
                                                 const img = await generateImage(apiKey, res.imagePrompt);
-                                                setGeneratedImageUrl(img);
+                                                if (img) {
+                                                    setGeneratedImageUrl(img);
+                                                } else {
+                                                    alert("イメージ(base64)の抽出に失敗しました。モデルの制限やクォータを確認してください。");
+                                                }
                                             }
+                                        } catch (error: any) {
+                                            alert("生成エラー: " + (error.message || "AI連携に失敗しました"));
                                         } finally {
                                             setIsAnalyzing(false);
                                         }
