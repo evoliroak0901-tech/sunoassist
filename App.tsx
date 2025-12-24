@@ -140,12 +140,12 @@ export const App: React.FC = () => {
         setIsConverting(true);
         try {
             const hira = await convertToHiragana(apiKey, lyricsOriginal);
-            if (hira && hira !== "変換エラー") {
+            if (hira) {
                 setLyricsHiragana(hira);
                 setActiveTab('hiragana');
                 alert("ひらがなに変換しました。");
             } else {
-                alert("ひらがな変換に失敗しました。APIキーを確認してください。");
+                alert("ひらがな変換の結果が空でした。");
             }
         } catch (error: any) {
             alert("エラー: " + (error.message || "通信エラーが発生しました"));
@@ -165,7 +165,7 @@ export const App: React.FC = () => {
                 setActiveTab('original');
                 alert("歌詞を生成しました。");
             } else {
-                alert("歌詞の生成に失敗しました。APIキーを確認してください。");
+                alert("歌詞の生成結果が空でした。");
             }
         } catch (error: any) {
             alert("エラー: " + (error.message || "AI呼び出しに失敗しました"));
@@ -192,7 +192,7 @@ export const App: React.FC = () => {
                     instruments: result.instruments
                 }));
             } else {
-                alert("アーティストの分析に失敗しました。キーが有効か確認してください。");
+                alert("アーティスト分析の結果を取得できませんでした。");
             }
         } catch (error: any) {
             alert("エラー: " + (error.message || "分析エラー"));
