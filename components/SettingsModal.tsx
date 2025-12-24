@@ -10,6 +10,7 @@ interface SettingsModalProps {
     settings: ThemeSettings;
     onUpdateSettings: (newSettings: ThemeSettings) => void;
     onRemoveApiKey?: () => void;
+    onResetApp?: () => void;
 }
 
 const COLORS: { key: ThemeColor; label: string; bg: string }[] = [
@@ -20,7 +21,7 @@ const COLORS: { key: ThemeColor; label: string; bg: string }[] = [
     { key: 'rose', label: 'Pink', bg: 'bg-rose-500' },
 ];
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdateSettings, onRemoveApiKey }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdateSettings, onRemoveApiKey, onResetApp }) => {
     if (!isOpen) return null;
 
     const handleColorChange = (mode: keyof ThemeSettings, color: ThemeColor) => {
@@ -33,16 +34,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <h2 className="font-bold text-gray-700">アプリ設定</h2>
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                     </button>
                 </div>
-                
+
                 <div className="p-6 space-y-6">
                     {/* Chat Settings */}
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                             <span className="text-xl">💬</span>
-                             <label className="text-sm font-bold text-gray-600">相談タブ (Chat)</label>
+                            <span className="text-xl">💬</span>
+                            <label className="text-sm font-bold text-gray-600">相談タブ (Chat)</label>
                         </div>
                         <div className="flex gap-3 justify-between">
                             {COLORS.map((c) => (
@@ -61,8 +62,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                     {/* Lyrics Settings */}
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                             <span className="text-xl">📝</span>
-                             <label className="text-sm font-bold text-gray-600">歌詞タブ (Lyrics)</label>
+                            <span className="text-xl">📝</span>
+                            <label className="text-sm font-bold text-gray-600">歌詞タブ (Lyrics)</label>
                         </div>
                         <div className="flex gap-3 justify-between">
                             {COLORS.map((c) => (
@@ -81,8 +82,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                     {/* Prompt Settings */}
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                             <span className="text-xl">🎵</span>
-                             <label className="text-sm font-bold text-gray-600">プロンプトタブ (Prompt)</label>
+                            <span className="text-xl">🎵</span>
+                            <label className="text-sm font-bold text-gray-600">プロンプトタブ (Prompt)</label>
                         </div>
                         <div className="flex gap-3 justify-between">
                             {COLORS.map((c) => (
@@ -96,8 +97,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                         </div>
                     </div>
 
-                     {/* API Key Management */}
-                     {onRemoveApiKey && (
+                    {/* API Key Management */}
+                    {onRemoveApiKey && (
                         <>
                             <hr className="border-gray-100" />
                             <div className="space-y-3">
@@ -105,6 +106,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                                 <Button variant="secondary" onClick={onRemoveApiKey} className="w-full !text-red-500 !border-red-100 hover:!bg-red-50">
                                     APIキーを削除 (ログアウト)
                                 </Button>
+                                {onResetApp && (
+                                    <Button variant="secondary" onClick={onResetApp} className="w-full !text-red-600 !border-red-200 hover:!bg-red-100 mt-2">
+                                        アプリを初期化 (全データ削除)
+                                    </Button>
+                                )}
                             </div>
                         </>
                     )}

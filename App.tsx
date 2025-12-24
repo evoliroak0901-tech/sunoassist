@@ -273,6 +273,13 @@ export const App: React.FC = () => {
         }
     };
 
+    const handleResetApp = () => {
+        if (window.confirm("【警告】\nアプリの全てのデータを削除して初期化しますか？\n\n・歌詞データ\n・チャット履歴\n・APIキー\n・設定\n\nこれらは全て消去され、復元できません。")) {
+            localStorage.clear();
+            window.location.reload();
+        }
+    };
+
     const currentLines = (activeTab === 'original' ? lyricsOriginal : lyricsHiragana).split('\n');
 
     return (
@@ -517,6 +524,7 @@ export const App: React.FC = () => {
                 settings={themeSettings}
                 onUpdateSettings={setThemeSettings}
                 onRemoveApiKey={handleRemoveApiKey}
+                onResetApp={handleResetApp}
             />
             <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
             {!apiKey && <ApiKeyModal onSave={setApiKey} />}
