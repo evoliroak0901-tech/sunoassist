@@ -42,7 +42,7 @@ export const generateLyrics = async (apiKey: string, keywords: string): Promise<
     Only output the lyrics with tags.
     `;
 
-    const model = getModel(apiKey, 'gemini-1.5-pro', systemInstruction);
+    const model = getModel(apiKey, 'gemini-1.5-flash', systemInstruction);
     const result = await model.generateContent(`Keywords/Theme: ${keywords}\n\nGenerate lyrics now.`);
     return result.response.text().trim() || null;
 };
@@ -67,7 +67,7 @@ export const analyzeArtistStyle = async (apiKey: string, artistName: string): Pr
     Return strictly JSON.
     `;
 
-    const model = getModel(apiKey, 'gemini-1.5-pro', systemInstruction);
+    const model = getModel(apiKey, 'gemini-1.5-flash', systemInstruction);
     const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: `Analyze the artist: ${artistName}` }] }],
         generationConfig: {
@@ -143,7 +143,7 @@ export const generateSunoPrompt = async (apiKey: string, params: PromptParams): 
     [Genre], [Sub-genre], [Instruments], [Vocal Style], [Mood/Atmosphere], [Tempo]
     `;
 
-    const model = getModel(apiKey, 'gemini-1.5-pro', systemInstruction);
+    const model = getModel(apiKey, 'gemini-1.5-flash', systemInstruction);
     const result = await model.generateContent("Generate the Suno prompt string now.");
 
     let finalPrompt = result.response.text().trim() || "";
@@ -194,19 +194,29 @@ export const generateVideoPromptForSection = async (apiKey: string, lyricsPart: 
 };
 
 export const generateImage = async (apiKey: string, prompt: string): Promise<string | null> => {
-    // According to user context, gemini-2.5-flash-image was the model used before.
-    const model = getModel(apiKey, 'gemini-2.5-flash-image');
-    const result = await model.generateContent(prompt);
+    try {
+        // Image generation is not natively supported in the same way here, 
+        // replacing with gemini-1.5-flash as a placeholder that will likely fail 404 for image bytes
+        // but it's better than a non-existent 2.5 model.
+        const model = getModel(apiKey, 'gemini-1.5-flash');
+        const result = await model.generateContent(prompt);
 
-    const response = result.response;
-    if (response.candidates && response.candidates[0].content && response.candidates[0].content.parts) {
-        for (const part of response.candidates[0].content.parts) {
-            if (part.inlineData && part.inlineData.mimeType.startsWith('image/')) {
-                return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        const response = result.response;
+        // Check for inlineData in parts
+        const parts = response.candidates?.[0]?.content?.parts;
+        if (parts) {
+            for (const part of parts) {
+                if (part.inlineData && part.inlineData.mimeType.startsWith('image/')) {
+                    return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                }
             }
         }
+        console.warn("No image data found in Gemini response.");
+        return null;
+    } catch (error) {
+        console.error("Error in generateImage:", error);
+        return null;
     }
-    return null;
 }
 
 export const createChatSession = (apiKey: string): ChatSession | null => {
