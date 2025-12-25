@@ -104,15 +104,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                             <label className="text-sm font-bold text-gray-600">AIモデル (Model)</label>
                         </div>
                         <select
-                            value={settings.model || 'gemini-1.5-flash-001'}
+                            value={settings.model || 'gemini-1.5-pro'}
                             onChange={(e) => onUpdateSettings({ ...settings, model: e.target.value })}
                             className="w-full p-2 text-sm border-2 border-gray-100 rounded-xl outline-none focus:border-blue-500 bg-white"
                         >
-                            <option value="gemini-1.5-flash-001">Gemini 1.5 Flash (Default)</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash (Alias)</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro (Recommended)</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gemini-1.5-flash-001">Gemini 1.5 Flash-001</option>
                             <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Preview)</option>
+                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Experimental)</option>
                         </select>
                         <p className="text-[10px] text-gray-400">※エラーが出る場合は、ここを切り替えてお試しください。</p>
                     </div>
