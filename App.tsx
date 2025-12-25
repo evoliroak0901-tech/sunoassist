@@ -101,7 +101,7 @@ export const App: React.FC = () => {
 
     useEffect(() => {
         if (apiKey && !chatSession.current) {
-            chatSession.current = createChatSession(apiKey, themeSettings.model);
+            chatSession.current = createChatSession(apiKey, themeSettings.model || 'gemini-1.5-pro');
         }
     }, [apiKey, themeSettings.model]);
 
@@ -144,7 +144,7 @@ export const App: React.FC = () => {
         }
         setIsConverting(true);
         try {
-            const hira = await convertToHiragana(apiKey, lyricsOriginal, themeSettings.model);
+            const hira = await convertToHiragana(apiKey, lyricsOriginal, themeSettings.model || 'gemini-1.5-pro');
             if (hira) {
                 setLyricsHiragana(hira);
                 setActiveTab('hiragana');
@@ -164,7 +164,7 @@ export const App: React.FC = () => {
         if (!keyword) return;
         setIsConverting(true);
         try {
-            const res = await generateLyrics(apiKey, keyword, themeSettings.model);
+            const res = await generateLyrics(apiKey, keyword, themeSettings.model || 'gemini-1.5-pro');
             if (res) {
                 setLyricsOriginal(res);
                 setActiveTab('original');
@@ -186,7 +186,7 @@ export const App: React.FC = () => {
         }
         setIsAnalyzing(true);
         try {
-            const result = await analyzeArtistStyle(apiKey, promptParams.artist, themeSettings.model);
+            const result = await analyzeArtistStyle(apiKey, promptParams.artist, themeSettings.model || 'gemini-1.5-pro');
             if (result) {
                 setPromptParams(prev => ({
                     ...prev,
@@ -216,7 +216,7 @@ export const App: React.FC = () => {
         reader.onload = async () => {
             try {
                 const base64 = reader.result as string;
-                const result = await analyzeVocalAudio(apiKey, base64, file.type, themeSettings.model);
+                const result = await analyzeVocalAudio(apiKey, base64, file.type, themeSettings.model || 'gemini-1.5-pro');
                 if (result) {
                     setPromptParams(prev => ({
                         ...prev,
@@ -239,7 +239,7 @@ export const App: React.FC = () => {
     const handleGeneratePrompt = async () => {
         setIsAnalyzing(true);
         try {
-            const prompt = await generateSunoPrompt(apiKey, promptParams, themeSettings.model);
+            const prompt = await generateSunoPrompt(apiKey, promptParams, themeSettings.model || 'gemini-1.5-pro');
             setSunoPrompt(prompt);
         } catch (error: any) {
             alert("エラー: " + (error.message || "プロンプト生成エラー"));
@@ -266,7 +266,7 @@ export const App: React.FC = () => {
     const handleClearChat = () => {
         if (window.confirm("履歴をクリアしますか？")) {
             setChatMessages([]);
-            chatSession.current = createChatSession(apiKey, themeSettings.model);
+            chatSession.current = createChatSession(apiKey, themeSettings.model || 'gemini-1.5-pro');
         }
     };
 
@@ -416,7 +416,7 @@ export const App: React.FC = () => {
                                 <h3 className={`text-sm font-bold ${t.textPrimary} mb-4 flex items-center gap-2`}><IconSparkles /> ボーカルXY設定</h3>
                                 <XYPad x={promptParams.vocalX} y={promptParams.vocalY} onChange={(x, y) => setPromptParams(p => ({ ...p, vocalX: x, vocalY: y }))} />
                                 <div className="mt-4 flex justify-center gap-2">
-                                    <Button variant="secondary" onClick={() => playVoiceSample(apiKey, "これはサンプルの声です。", promptParams.vocalX, promptParams.vocalY, themeSettings.model)} themeColor={currentTheme}>🔊 試聴</Button>
+                                    <Button variant="secondary" onClick={() => playVoiceSample(apiKey, "これはサンプルの声です。", promptParams.vocalX, promptParams.vocalY, themeSettings.model || 'gemini-1.5-pro')} themeColor={currentTheme}>🔊 試聴</Button>
                                     <Button variant="secondary" onClick={() => audioInputRef.current?.click()} themeColor={currentTheme} disabled={isAnalyzing}>
                                         {isAnalyzing ? '分析中...' : '🎙️ 音声分析'}
                                     </Button>
@@ -480,10 +480,10 @@ export const App: React.FC = () => {
                                         if (!lyricsOriginal) { alert("歌詞を入力してください"); return; }
                                         setIsAnalyzing(true);
                                         try {
-                                            const res = await generateVisualPrompts(apiKey, lyricsOriginal, themeSettings.model);
+                                            const res = await generateVisualPrompts(apiKey, lyricsOriginal, themeSettings.model || 'gemini-1.5-pro');
                                             setVisualResult(res);
                                             if (res) {
-                                                const img = await generateImage(apiKey, res.imagePrompt, themeSettings.model);
+                                                const img = await generateImage(apiKey, res.imagePrompt, themeSettings.model || 'gemini-1.5-pro');
                                                 if (img) {
                                                     setGeneratedImageUrl(img);
                                                 } else {
