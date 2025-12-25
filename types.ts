@@ -58,6 +58,7 @@ export interface ThemeSettings {
     prompt: ThemeColor;
     chat: ThemeColor;
     creation: ThemeColor;
+    model?: string; // App-wide setting, but stored here for convenience or new Settings interface logic
 }
 
 export interface VocalPreset {

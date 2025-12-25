@@ -12,10 +12,10 @@ const getModel = (apiKey: string, modelName: string, systemInstruction?: string)
     });
 };
 
-export const convertToHiragana = async (apiKey: string, text: string): Promise<string> => {
+export const convertToHiragana = async (apiKey: string, text: string, modelName: string = 'gemini-1.5-flash-001'): Promise<string> => {
     if (!text.trim()) return "";
 
-    const model = getModel(apiKey, 'gemini-1.5-flash-001', `You are a Japanese lyrics converter. 
+    const model = getModel(apiKey, modelName, `You are a Japanese lyrics converter. 
       Task: Convert the following Japanese song lyrics strictly into Hiragana (reading). 
       Rules:
       1. Maintain the exact same line structure and line breaks.
@@ -28,7 +28,7 @@ export const convertToHiragana = async (apiKey: string, text: string): Promise<s
     return result.response.text().trim() || "";
 };
 
-export const generateLyrics = async (apiKey: string, keywords: string): Promise<string | null> => {
+export const generateLyrics = async (apiKey: string, keywords: string, modelName: string = 'gemini-1.5-flash-001'): Promise<string | null> => {
     const systemInstruction = `
     You are a professional songwriter.
     Task: Write song lyrics based on the provided keywords or theme.
@@ -47,7 +47,7 @@ export const generateLyrics = async (apiKey: string, keywords: string): Promise<
     return result.response.text().trim() || null;
 };
 
-export const analyzeArtistStyle = async (apiKey: string, artistName: string): Promise<ArtistAnalysisResult | null> => {
+export const analyzeArtistStyle = async (apiKey: string, artistName: string, modelName: string = 'gemini-1.5-flash-001'): Promise<ArtistAnalysisResult | null> => {
     const systemInstruction = `
     You are a music analysis expert for Suno AI prompting.
     Analyze the artist provided by the user and map their style to the following parameters.
@@ -80,7 +80,7 @@ export const analyzeArtistStyle = async (apiKey: string, artistName: string): Pr
     return JSON.parse(jsonText) as ArtistAnalysisResult;
 }
 
-export const analyzeVocalAudio = async (apiKey: string, base64Audio: string, mimeType: string): Promise<AudioAnalysisResult | null> => {
+export const analyzeVocalAudio = async (apiKey: string, base64Audio: string, mimeType: string, modelName: string = 'gemini-1.5-flash-001'): Promise<AudioAnalysisResult | null> => {
     const systemInstruction = `
     You are an expert audio engineer. Listen to the provided vocal audio sample and analyze its characteristics.
     Map the analysis to the following parameters:
@@ -113,7 +113,7 @@ export const analyzeVocalAudio = async (apiKey: string, base64Audio: string, mim
     return JSON.parse(jsonText) as AudioAnalysisResult;
 };
 
-export const generateSunoPrompt = async (apiKey: string, params: PromptParams): Promise<string> => {
+export const generateSunoPrompt = async (apiKey: string, params: PromptParams, modelName: string = 'gemini-1.5-flash-001'): Promise<string> => {
     let vocalDesc = "";
     const x = params.vocalX;
     const y = params.vocalY;
@@ -143,7 +143,7 @@ export const generateSunoPrompt = async (apiKey: string, params: PromptParams): 
     [Genre], [Sub-genre], [Instruments], [Vocal Style], [Mood/Atmosphere], [Tempo]
     `;
 
-    const model = getModel(apiKey, 'gemini-1.5-flash-001', systemInstruction);
+    const model = getModel(apiKey, modelName, systemInstruction);
     const result = await model.generateContent("Generate the Suno prompt string now.");
 
     let finalPrompt = result.response.text().trim() || "";
@@ -151,7 +151,7 @@ export const generateSunoPrompt = async (apiKey: string, params: PromptParams): 
     return finalPrompt;
 };
 
-export const generateVisualPrompts = async (apiKey: string, lyrics: string): Promise<VisualPromptResult | null> => {
+export const generateVisualPrompts = async (apiKey: string, lyrics: string, modelName: string = 'gemini-1.5-flash-001'): Promise<VisualPromptResult | null> => {
     const systemInstruction = `
     You are a creative director. Analyze the provided lyrics and extract core imagery and mood.
     Output a JSON object with:
@@ -159,7 +159,7 @@ export const generateVisualPrompts = async (apiKey: string, lyrics: string): Pro
     2. imagePrompt: Detailed English prompt for image generator.
     `;
 
-    const model = getModel(apiKey, 'gemini-1.5-flash-001', systemInstruction);
+    const model = getModel(apiKey, modelName, systemInstruction);
     const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: `Lyrics:\n${lyrics}` }] }],
         generationConfig: {
@@ -172,14 +172,14 @@ export const generateVisualPrompts = async (apiKey: string, lyrics: string): Pro
     return JSON.parse(jsonText) as VisualPromptResult;
 };
 
-export const generateVideoPromptForSection = async (apiKey: string, lyricsPart: string): Promise<VideoPromptResult | null> => {
+export const generateVideoPromptForSection = async (apiKey: string, lyricsPart: string, modelName: string = 'gemini-1.5-flash-001'): Promise<VideoPromptResult | null> => {
     const systemInstruction = `
     You are a video direction expert. Create a video generation prompt for a section of a song.
     Input Lyrics: "${lyricsPart}"
     Output JSON: sceneDescription (Japanese, max 30 chars), soraPrompt (English, detailed visual motion).
     `;
 
-    const model = getModel(apiKey, 'gemini-1.5-flash-001', systemInstruction);
+    const model = getModel(apiKey, modelName, systemInstruction);
     const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: `Generate video prompt for section.` }] }],
         generationConfig: {
@@ -193,12 +193,12 @@ export const generateVideoPromptForSection = async (apiKey: string, lyricsPart: 
     return { ...json, lyricsPart } as VideoPromptResult;
 };
 
-export const generateImage = async (apiKey: string, prompt: string): Promise<string | null> => {
+export const generateImage = async (apiKey: string, prompt: string, modelName: string = 'gemini-1.5-flash-001'): Promise<string | null> => {
     try {
         // Image generation is not natively supported in the same way here, 
         // replacing with gemini-1.5-flash as a placeholder that will likely fail 404 for image bytes
         // but it's better than a non-existent 2.5 model.
-        const model = getModel(apiKey, 'gemini-1.5-flash-001');
+        const model = getModel(apiKey, modelName);
         const result = await model.generateContent(prompt);
 
         const response = result.response;
@@ -219,8 +219,8 @@ export const generateImage = async (apiKey: string, prompt: string): Promise<str
     }
 }
 
-export const createChatSession = (apiKey: string): ChatSession | null => {
-    const model = getModel(apiKey, 'gemini-1.5-flash-001', "あなたはプロの音楽プロデューサー兼作詞家のアシスタントです。ユーザーの作詞、楽曲構成、Suno AIのプロンプト作成などについて日本語でアドバイスをしてください。");
+export const createChatSession = (apiKey: string, modelName: string = 'gemini-1.5-flash-001'): ChatSession | null => {
+    const model = getModel(apiKey, modelName, "あなたはプロの音楽プロデューサー兼作詞家のアシスタントです。ユーザーの作詞、楽曲構成、Suno AIのプロンプト作成などについて日本語でアドバイスをしてください。");
     return model.startChat();
 };
 
@@ -255,13 +255,13 @@ async function decodeAudioData(
     return buffer;
 }
 
-export const playVoiceSample = async (apiKey: string, text: string, vocalX: number, vocalY: number): Promise<void> => {
+export const playVoiceSample = async (apiKey: string, text: string, vocalX: number, vocalY: number, modelName: string = 'gemini-1.5-flash-001'): Promise<void> => {
     let voiceName = 'Zephyr';
     if (vocalX < -20) voiceName = 'Charon';
     else if (vocalX > 20) voiceName = 'Kore';
     else voiceName = 'Puck';
 
-    const model = getModel(apiKey, "gemini-1.5-flash-001");
+    const model = getModel(apiKey, modelName);
 
     const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: text }] }],

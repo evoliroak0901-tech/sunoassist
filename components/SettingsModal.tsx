@@ -97,7 +97,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                         </div>
                     </div>
 
-                    {/* API Key Management */}
+                    {/* Model Settings */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xl">🤖</span>
+                            <label className="text-sm font-bold text-gray-600">AIモデル (Model)</label>
+                        </div>
+                        <select
+                            value={settings.model || 'gemini-1.5-flash-001'}
+                            onChange={(e) => onUpdateSettings({ ...settings, model: e.target.value })}
+                            className="w-full p-2 text-sm border-2 border-gray-100 rounded-xl outline-none focus:border-blue-500 bg-white"
+                        >
+                            <option value="gemini-1.5-flash-001">Gemini 1.5 Flash (Default)</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash (Alias)</option>
+                            <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Preview)</option>
+                        </select>
+                        <p className="text-[10px] text-gray-400">※エラーが出る場合は、ここを切り替えてお試しください。</p>
+                    </div>
+
+                    <hr className="border-gray-100" />
                     {onRemoveApiKey && (
                         <>
                             <hr className="border-gray-100" />
