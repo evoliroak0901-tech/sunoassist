@@ -73,12 +73,17 @@ export const App: React.FC = () => {
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [themeSettings, setThemeSettings] = useState<ThemeSettings>(() => {
         const saved = localStorage.getItem('suno_theme');
-        return saved ? JSON.parse(saved) : {
+        const settings = saved ? JSON.parse(saved) : {
             lyrics: 'orange',
             prompt: 'blue',
             chat: 'emerald',
             creation: 'violet'
         };
+        // Auto-migration: Force gemini-1.5-pro if model is undefined or using problematic models
+        if (!settings.model || settings.model === 'gemini-1.5-flash-001' || settings.model === 'gemini-1.5-flash') {
+            settings.model = 'gemini-1.5-pro';
+        }
+        return settings;
     });
 
     const currentTheme = themeSettings[mode];
